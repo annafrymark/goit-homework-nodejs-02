@@ -22,4 +22,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message })
 })
 
+// app.get('/', (request, response, next) => {
+
+// })
+
+// app.listen(3000, () => {
+//   console.log('Example App is working on port 3000!')
+// })
+
+// app.METHOD(PATH, HANDLER)
+
 module.exports = app
