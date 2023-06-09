@@ -8,9 +8,7 @@ router.get("/", async (req, res, next) => {
   res.json({ status: "success", code: 200, data: contactList });
 });
 
-// router.get('/:contactId', async (req, res, next) => {
-//   res.json({ message: 'template message' })
-// })
+
 
 router.get("/:contactId", async (req, res, next) => {
   const contactId = req.params.contactId;

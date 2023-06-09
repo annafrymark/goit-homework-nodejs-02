@@ -5,8 +5,12 @@ const contactsPath = path.resolve("./models/contacts.json");
 const listContacts = async () => {
   try {
     const response = await fs.readFile(contactsPath);
-    const responseJson = JSON.stringify(JSON.parse(response));
-    return responseJson;
+    const parsedContacts = JSON.parse(response);
+    let stringifiedContacts = [];
+    parsedContacts.forEach((contact) => {
+      stringifiedContacts.push(JSON.stringify(contact));
+    });
+    return stringifiedContacts;
   } catch (error) {
     console.log(error);
   }
@@ -62,7 +66,7 @@ const updateContact = async (contactId, body) => {
     const parsedContacts = JSON.parse(contacts);
 
     let [contact] = parsedContacts.filter((con) => con.id === contactId);
-    
+
     if (!contact) {
       return null;
     }
