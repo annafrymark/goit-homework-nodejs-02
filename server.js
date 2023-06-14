@@ -1,13 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+mongoose.Promise = global.Promise;
 
 require("dotenv").config();
 
 const app = express();
 
 // const app = require("./app");
-
 
 // parse application/json
 app.use(express.json());
@@ -29,15 +29,9 @@ connection
       console.log(`Server running. Use our API on port: ${PORT}`);
     });
   })
-  .catch((err) =>
-    console.log(`Server not running. Error message: ${err.message}`)
-  );
+  .catch((err) => {
+    console.log(`Server not running. Error message: ${err.message}`);
+      process.exit(1);
+  });
 
 
-
-
-
-
-app.listen(3000, () => {
-  console.log("Server running. Use our API on port: 3000");
-});
