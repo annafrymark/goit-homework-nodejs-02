@@ -1,4 +1,5 @@
 const express = require("express");
+
 const router = express.Router();
 const contacts = require("../../models/contacts");
 const { nanoid } = require("nanoid");
@@ -7,8 +8,6 @@ router.get("/", async (req, res, next) => {
   const contactList = await contacts.listContacts();
   res.json({ status: "success", code: 200, data: contactList });
 });
-
-
 
 router.get("/:contactId", async (req, res, next) => {
   const contactId = req.params.contactId;
