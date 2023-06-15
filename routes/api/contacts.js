@@ -4,11 +4,13 @@ const router = express.Router();
 const contacts = require("../../models/contacts");
 const { nanoid } = require("nanoid");
 
+//get
 router.get("/", async (req, res, next) => {
   const contactList = await contacts.listContacts();
   res.json({ status: "success", code: 200, data: contactList });
 });
 
+//getbyID
 router.get("/:contactId", async (req, res, next) => {
   const contactId = req.params.contactId;
   const contact = await contacts.getContactById(contactId);
@@ -27,6 +29,7 @@ router.get("/:contactId", async (req, res, next) => {
   }
 });
 
+//create-addContact
 router.post("/", async (req, res, next) => {
   if (req.body.name && req.body.email && req.body.phone) {
     req.body.id = nanoid();
@@ -46,6 +49,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+//removeContact
 router.delete("/:contactId", async (req, res, next) => {
   let contactId = req.params.contactId;
   let deleted = false;
@@ -68,6 +72,7 @@ router.delete("/:contactId", async (req, res, next) => {
   }
 });
 
+//update
 router.put("/:contactId", async (req, res, next) => {
   const contactId = req.params.contactId;
   if (req.body && contactId) {
@@ -93,5 +98,8 @@ router.put("/:contactId", async (req, res, next) => {
     });
   }
 });
+
+//updateStatus-favorite
+router.patch("/:contactId/favorite")
 
 module.exports = router;
