@@ -15,11 +15,12 @@ app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
-const uriDb = process.env.DB_HOST;
+const uriDb = process.env.DB_URI;
 
 const connection = mongoose.connect(uriDb, {
+  useNewUrlParser: true,
   useUnifiedTopology: true,
-  useFindAndModify: false,
+  // useFindAndModify: false,
 });
 
 connection
@@ -31,7 +32,5 @@ connection
   })
   .catch((err) => {
     console.log(`Server not running. Error message: ${err.message}`);
-      process.exit(1);
+    process.exit(1);
   });
-
-
