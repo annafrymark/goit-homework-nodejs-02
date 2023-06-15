@@ -5,9 +5,8 @@ mongoose.Promise = global.Promise;
 
 require("dotenv").config();
 
-const app = express();
 
-// const app = require("./app");
+const app = require("./app");
 
 // parse application/json
 app.use(express.json());
