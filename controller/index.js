@@ -16,7 +16,6 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   const id = req.params.contactId;
-  console.log(id);
   try {
     const result = await service.getContactById(id);
     if (result) {
@@ -42,7 +41,7 @@ const getById = async (req, res, next) => {
 const addContact = async (req, res, next) => {
   const { name, email, phone, favorite } = req.body;
   try {
-    const result = service.addContact({ name, email, phone, favorite });
+    const result = await service.addContact({ name, email, phone, favorite });
     res.status(201).json({
       status: "success",
       code: 201,
