@@ -15,7 +15,8 @@ const getAll = async (req, res, next) => {
 };
 
 const getById = async (req, res, next) => {
-  const { id } = req.params;
+  const id = req.params.contactId;
+  console.log(id);
   try {
     const result = await service.getContactById(id);
     if (result) {
