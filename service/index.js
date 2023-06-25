@@ -1,11 +1,11 @@
 const Contact = require("./schemas/contact");
 
-const listContacts = async () => {
-  return Contact.find();
+const listContacts = async (owner) => {
+  return Contact.find({ owner: owner });
 };
 
-const getContactById = (id) => {
-  return Contact.findOne({ _id: id });
+const getContactById = (id, owner) => {
+  return Contact.findOne({ _id: id, owner: owner });
 };
 
 const addContact = (contact) => {
@@ -13,12 +13,14 @@ const addContact = (contact) => {
   return newContact;
 };
 
-const updateContact = () => {
-  return Contact.findByIdAndUpdate({ _id: id }, body, { new: true });
+const updateContact = (id, contact, owner) => {
+  return Contact.findByIdAndUpdate({ _id: id, owner: owner }, contact, {
+    new: true,
+  });
 };
 
-const removeContact = (id) => {
-  return Contact.findByIdAndRemove({ _id: id });
+const removeContact = (id, owner) => {
+  return Contact.findByIdAndRemove({ _id: id, owner: owner });
 };
 
 module.exports = {
