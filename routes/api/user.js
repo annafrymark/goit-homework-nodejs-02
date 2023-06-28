@@ -13,8 +13,12 @@ const schema = Joi.object({
     minDomainSegments: 2,
     tlds: { allow: ["com", "net"] },
   }),
-
-  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+  //Password regex - minimum 3 and maximum 10 characters, at least one uppercase letter, one lowercase letter, one number and one special character
+  password: Joi.string().pattern(
+    new RegExp(
+      "^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{3,10}$"
+    )
+  ),
 });
 
 const auth = (req, res, next) => {
