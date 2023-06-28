@@ -2,7 +2,7 @@ const service = require("../service");
 
 const getAll = async (req, res, next) => {
   try {
-    const result = await service.listContacts();
+    const result = await service.listContacts(req.user._id);
     res.json({
       status: "success",
       code: 200,
@@ -17,7 +17,7 @@ const getAll = async (req, res, next) => {
 const getById = async (req, res, next) => {
   const id = req.params.contactId;
   try {
-    const result = await service.getContactById(id);
+    const result = await service.getContactById(id, req.user._id);
     if (result) {
       res.json({
         status: "success",
@@ -41,7 +41,13 @@ const getById = async (req, res, next) => {
 const addContact = async (req, res, next) => {
   const { name, email, phone, favorite } = req.body;
   try {
-    const result = await service.addContact({ name, email, phone, favorite });
+    const result = await service.addContact({
+      name,
+      email,
+      phone,
+      favorite,
+      owner: req.user._id,
+    });
     res.status(201).json({
       status: "success",
       code: 201,
@@ -54,15 +60,19 @@ const addContact = async (req, res, next) => {
 };
 
 const updateContact = async (req, res, next) => {
-  const { id } = req.params;
+  const id = req.params.contactId;
   const { name, email, phone, favorite } = req.body;
   try {
-    const result = await service.updateContact(id, {
-      name,
-      email,
-      phone,
-      favorite,
-    });
+    const result = await service.updateContact(
+      id,
+      {
+        name,
+        email,
+        phone,
+        favorite,
+      },
+      req.user._id
+    );
     if (result) {
       res.json({
         status: "success",
@@ -83,11 +93,15 @@ const updateContact = async (req, res, next) => {
 };
 
 const updateStatusContact = async (req, res, next) => {
-  const { id } = req.params;
+  const id = req.params.contactId;
   const { favorite = false } = req.body;
 
   try {
-    const result = await service.updateContact(id, { favorite });
+    const result = await service.updateContact(
+      id,
+      { favorite: favorite },
+      req.user._id
+    );
     if (result) {
       res.json({
         status: "success",
@@ -112,7 +126,7 @@ const removeContact = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const result = await service.removeContact(id);
+    const result = await service.removeContact(id, req.user._id);
     if (result) {
       res.json({
         status: "success",

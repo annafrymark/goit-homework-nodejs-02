@@ -5,13 +5,9 @@ mongoose.Promise = global.Promise;
 
 require("dotenv").config();
 
-
 const app = require("./app");
 
-// parse application/json
-app.use(express.json());
-// cors
-app.use(cors());
+require("./config/config-passport");
 
 const PORT = process.env.PORT || 3000;
 const uriDb = process.env.DB_URI;
