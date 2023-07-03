@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bCrypt = require("bcryptjs");
+const gravatar = require("gravatar");
 
 const Schema = mongoose.Schema;
 
@@ -22,6 +23,12 @@ const user = new Schema({
     type: String,
     default: null,
   },
+  avatarURL: {
+    type: String,
+    default: function () {
+      return gravatar.url(this.email, { s: "200", r: "g", d: "robohash" });
+    }
+  },
 });
 
 user.methods.setPassword = function (password) {
@@ -31,6 +38,8 @@ user.methods.setPassword = function (password) {
 user.methods.validPassword = function (password) {
   return bCrypt.compareSync(password, this.password);
 };
+
+//const avatarURL = gravatar.url(user.email);
 
 const User = mongoose.model("user", user);
 
