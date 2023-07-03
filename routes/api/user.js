@@ -19,7 +19,7 @@ const schema = Joi.object({
   }),
   //Password regex - minimum 3 and maximum 10 characters, at least one uppercase letter, one lowercase letter, one number and one special character
   password: Joi.string().pattern(
-    new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*W)(?!.* ).{4,16}$")
+    new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\W).{4,16}$")
   ),
 });
 
