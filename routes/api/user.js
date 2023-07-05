@@ -52,11 +52,12 @@ const storage = multer.diskStorage({
 
 function getFilenameWithSuffix(originalname, callback) {
   const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-  callback(null, uniqueSuffix + "-" + originalname + ext);
+  console.log(uniqueSuffix);
+  callback(null, uniqueSuffix + "-" + originalname);
 }
 
 const upload = multer({
-  storage,
+  storage: storage,
 });
 
 router.post("/login", async (req, res, next) => {
@@ -182,45 +183,53 @@ router.get("/current", auth, async (req, res, next) => {
   }
 });
 
-router.patch("/avatars", auth, async (req, res, next) => {
-  const user = req.user;
-  if (!user) {
-    return res.status(401).json({
-      status: "error",
-      code: 401,
-      message: "Not authorized",
-      data: "Not authorized",
-    });
-  } else {
-    try {
-      await upload.single("awatar");
-      if (!req.file) {
-        return res.status(400).json({
-          status: "error",
-          code: 400,
-          message: "File not provided",
-          data: "File not provided",
-        });
-      } else {
-        const ResizedAvatar = await Jimp.read(req.file.path)
-          .resize(250, 250)
-          .writeAsync(req.file.path);
-        user.avatarURL = `/avatars/${req.file.filename}`;
-        await user.save();
-        res.status(200).json({
-          status: "success",
-          code: 200,
-          message: "success",
-          data: { avatarURL: user.avatarURL },
-        });
-        await ResizedAvatar.writeAsync(path.join(avatarDir, req.file.filename));
+router.patch(
+  "/avatars",
+  [upload.single("avatar"), auth],
+  async (req, res, next) => {
+    const user = req.user;
+    console.log(req.file);
+    console.log("jestem tutaj");
+    if (!user) {
+      return res.status(401).json({
+        status: "error",
+        code: 401,
+        message: "Not authorized",
+        data: "Not authorized",
+      });
+    } else {
+      try {
+        // upload.single("picture");
+        //console.log(req);
+        if (!req.file) {
+          return res.status(400).json({
+            status: "error",
+            code: 400,
+            message: "File not provided",
+            data: "File not provided",
+          });
+        } else {
+          const ResizedAvatar = await Jimp.read(req.file.path);
+           await ResizedAvatar.resize(250, 250).writeAsync(req.file.path);
+          user.avatarURL = `/avatars/${req.file.filename}`;
+          await user.save();
+          res.status(200).json({
+            status: "success",
+            code: 200,
+            message: "success",
+            data: { avatarURL: user.avatarURL },
+          });
+          await ResizedAvatar.writeAsync(
+            path.join(avatarDir, req.file.filename)
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        next(error);
       }
-    } catch (error) {
-      console.error(error);
-      next(error);
     }
   }
-});
+);
 
 module.exports = {
   router,
