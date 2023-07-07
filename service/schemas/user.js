@@ -27,7 +27,15 @@ const user = new Schema({
     type: String,
     default: function () {
       return gravatar.url(this.email, { s: "200", r: "g", d: "robohash" });
-    }
+    },
+  },
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    required: [true, "Verify token is required"],
   },
 });
 
