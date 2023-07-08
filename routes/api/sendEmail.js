@@ -13,8 +13,8 @@ async function sendVerificationEmail(email, verificationToken) {
     to: email, // Change to your recipient
     from: "annamarai.dev@gmail.com", // Change to your verified sender
     subject: "Verification email",
-    text: `Please verify your email: http://localhost:3000/api/users/verify/:${verificationToken}`,
-    html: `<p>Please verify your email: <a href = http://localhost:3000/api/users/verify/:${verificationToken}></p>`,
+    text: `Please verify your email: ${process.env.HOST_URL}/api/users/verify/:${verificationToken}`,
+    html: `<p>Please verify your email: <a href = ${process.env.HOST_URL}/api/users/verify/:${verificationToken}></p>`,
   };
   sgMail
     .send(msg)

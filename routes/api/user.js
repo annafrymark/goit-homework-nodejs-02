@@ -134,12 +134,11 @@ router.post("/signup", async (req, res, next) => {
   try {
     const newUser = new User({ email: email });
     newUser.setPassword(password);
-
-    const verificationToken = createVerificationToken();
-
-    await sendVerificationEmail(email, verificationToken);
-
+    newUser.verificationToken = createVerificationToken();
     await newUser.save();
+
+    await sendVerificationEmail(email, newUser.verificationToken);
+
     res.status(201).json({
       status: "success",
       code: 201,
