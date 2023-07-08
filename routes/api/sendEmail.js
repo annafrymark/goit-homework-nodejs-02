@@ -1,11 +1,12 @@
 const sgMail = require("@sendgrid/mail");
 
-const nanoid = require("nanoid/async");
+const { nanoid } = require("nanoid");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-async function createVerificationToken() {
-  verificationToken = await nanoid();
+function createVerificationToken() {
+  verificationToken = nanoid();
+  console.log(verificationToken);
 }
 
 async function sendVerificationEmail(email, verificationToken) {

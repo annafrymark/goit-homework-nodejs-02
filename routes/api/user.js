@@ -25,6 +25,7 @@ const schema = Joi.object({
   password: Joi.string().pattern(
     new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\W).{4,16}$")
   ),
+  verificationToken: [Joi.string(), Joi.number()],
 });
 
 const auth = (req, res, next) => {
@@ -98,6 +99,13 @@ router.post("/login", async (req, res, next) => {
   user.token = token;
   user.save();
 
+  if (!user.verify)
+    return res.status(400).json({
+      status: "Bad Request",
+      code: 400,
+      message: "Email is not verified",
+    });
+
   return res.json({
     status: "success",
     code: 200,
@@ -112,7 +120,7 @@ router.post("/signup", async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    await schema.validateAsync({ email, password });
+    await schema.validateAsync({ email: email, password: password });
   } catch (err) {
     return res.status(401).json({
       status: "error",
