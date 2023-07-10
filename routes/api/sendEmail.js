@@ -1,12 +1,12 @@
 const sgMail = require("@sendgrid/mail");
-
+require("dotenv").config();
 const { nanoid } = require("nanoid");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 function createVerificationToken() {
   verificationToken = nanoid();
-  console.log(verificationToken);
+  return verificationToken;
 }
 
 async function sendVerificationEmail(email, verificationToken) {
@@ -26,5 +26,6 @@ async function sendVerificationEmail(email, verificationToken) {
       console.error(error);
     });
 }
+
 
 module.exports = { createVerificationToken, sendVerificationEmail };

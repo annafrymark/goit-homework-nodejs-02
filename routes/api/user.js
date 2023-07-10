@@ -90,6 +90,13 @@ router.post("/login", async (req, res, next) => {
     });
   }
 
+  if (!user.verify)
+    return res.status(400).json({
+      status: "Bad Request",
+      code: 400,
+      message: "Email is not verified",
+    });
+
   const payload = {
     id: user._id,
     email: user.email,
@@ -98,13 +105,6 @@ router.post("/login", async (req, res, next) => {
   const token = jwt.sign(payload, secret, { expiresIn: "1h" });
   user.token = token;
   user.save();
-
-  if (!user.verify)
-    return res.status(400).json({
-      status: "Bad Request",
-      code: 400,
-      message: "Email is not verified",
-    });
 
   return res.json({
     status: "success",
@@ -122,7 +122,7 @@ router.post("/signup", async (req, res, next) => {
   try {
     await schema.validateAsync({ email: email, password: password });
   } catch (err) {
-    return res.status(401).json({
+    return res.status(400).json({
       status: "error",
       code: 400,
       message: "Bad request",
@@ -140,11 +140,14 @@ router.post("/signup", async (req, res, next) => {
     });
   }
   try {
-    const newUser = new User({ email: email });
+    const verificationToken = createVerificationToken();
+    const newUser = new User({
+      email: email,
+      verificationToken: verificationToken,
+    });
     newUser.setPassword(password);
-    newUser.verificationToken = createVerificationToken();
     await newUser.save();
-
+    console.log(newUser.verificationToken);
     await sendVerificationEmail(email, newUser.verificationToken);
 
     res.status(201).json({
@@ -247,7 +250,7 @@ router.patch(
   }
 );
 
-router.get("/verify/:verificationToken", auth, async (req, res, next) => {
+router.get("/verify/:verificationToken", async (req, res, next) => {
   try {
     const user = await User.findOne({
       verificationToken: req.params.verificationToken,
@@ -264,7 +267,7 @@ router.get("/verify/:verificationToken", auth, async (req, res, next) => {
     user.verify = true;
     await user.save();
 
-    return res.json(200).json({
+    res.status(200).json({
       status: "success",
       code: 200,
       message: "Verification successful",
@@ -278,7 +281,7 @@ router.get("/verify/:verificationToken", auth, async (req, res, next) => {
 router.post("/verify", async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: email });
     if (!user) {
       return res.status(404).json({
         status: "error",
