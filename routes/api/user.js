@@ -8,9 +8,13 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const User = require("../../service/schemas/user");
-// const { response } = require("../../app");
+
 require("dotenv").config();
 const secret = process.env.JWT_KEY;
+const {
+  createVerificationToken,
+  sendVerificationEmail,
+} = require("./sendEmail");
 
 const schema = Joi.object({
   email: Joi.string().email({
@@ -21,6 +25,7 @@ const schema = Joi.object({
   password: Joi.string().pattern(
     new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\W).{4,16}$")
   ),
+  verificationToken: [Joi.string(), Joi.number()],
 });
 
 const auth = (req, res, next) => {
@@ -85,6 +90,13 @@ router.post("/login", async (req, res, next) => {
     });
   }
 
+  if (!user.verify)
+    return res.status(400).json({
+      status: "Bad Request",
+      code: 400,
+      message: "Email is not verified",
+    });
+
   const payload = {
     id: user._id,
     email: user.email,
@@ -108,9 +120,9 @@ router.post("/signup", async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    await schema.validateAsync({ email, password });
+    await schema.validateAsync({ email: email, password: password });
   } catch (err) {
-    return res.status(401).json({
+    return res.status(400).json({
       status: "error",
       code: 400,
       message: "Bad request",
@@ -128,9 +140,16 @@ router.post("/signup", async (req, res, next) => {
     });
   }
   try {
-    const newUser = new User({ email: email });
+    const verificationToken = createVerificationToken();
+    const newUser = new User({
+      email: email,
+      verificationToken: verificationToken,
+    });
     newUser.setPassword(password);
     await newUser.save();
+    console.log(newUser.verificationToken);
+    await sendVerificationEmail(email, newUser.verificationToken);
+
     res.status(201).json({
       status: "success",
       code: 201,
@@ -188,8 +207,8 @@ router.patch(
   [upload.single("avatar"), auth],
   async (req, res, next) => {
     const user = req.user;
-    console.log(req.file);
-    console.log("jestem tutaj");
+    // console.log(req.file);
+
     if (!user) {
       return res.status(401).json({
         status: "error",
@@ -210,7 +229,7 @@ router.patch(
           });
         } else {
           const ResizedAvatar = await Jimp.read(req.file.path);
-           await ResizedAvatar.resize(250, 250).writeAsync(req.file.path);
+          await ResizedAvatar.resize(250, 250).writeAsync(req.file.path);
           user.avatarURL = `/avatars/${req.file.filename}`;
           await user.save();
           res.status(200).json({
@@ -230,6 +249,71 @@ router.patch(
     }
   }
 );
+
+router.get("/verify/:verificationToken", async (req, res, next) => {
+  try {
+    const user = await User.findOne({
+      verificationToken: req.params.verificationToken,
+    });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        code: 404,
+        message: "User not found",
+        data: "not found",
+      });
+    }
+    user.verificationToken = null;
+    user.verify = true;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      code: 200,
+      message: "Verification successful",
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+router.post("/verify", async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        code: 404,
+        message: "missing required field email",
+      });
+    }
+
+    if (user.verify) {
+      return res.status(400).json({
+        status: "Bad Request",
+        code: 400,
+        message: "Verification has already been passed",
+      });
+    }
+
+    const verificationToken = createVerificationToken();
+    user.verificationToken = verificationToken;
+    await user.save();
+
+    await sendVerificationEmail(email, verificationToken);
+
+    return res.status(200).json({
+      status: "success",
+      code: 200,
+      message: "Verification email sent",
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
 
 module.exports = {
   router,

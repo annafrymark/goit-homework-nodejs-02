@@ -27,7 +27,15 @@ const user = new Schema({
     type: String,
     default: function () {
       return gravatar.url(this.email, { s: "200", r: "g", d: "robohash" });
-    }
+    },
+  },
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    // required: [true, "Verify token is required"],
   },
 });
 
@@ -38,8 +46,6 @@ user.methods.setPassword = function (password) {
 user.methods.validPassword = function (password) {
   return bCrypt.compareSync(password, this.password);
 };
-
-//const avatarURL = gravatar.url(user.email);
 
 const User = mongoose.model("user", user);
 
